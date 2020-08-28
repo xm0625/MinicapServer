@@ -11,8 +11,7 @@ sys.setdefaultencoding('utf-8')
 # from wsgiref module import:
 from wsgiref.simple_server import make_server
 from cgi import parse_qs, escape
-import urllib
-import urllib2
+import requests
 import json
 
 password = "123456"
@@ -40,17 +39,18 @@ def parse_and_fetch(request):
     url = request["url"]
     print 'request["method"]:'+request["method"]
     if request["method"] == "GET":
-        response=urllib.urlopen(url)
-        content=response.read()
+        session = requests.Session()
+        response = session.get(url)
+        content=response.text
         print "http get res:"+content
         return content
     if request["method"] == "POST":
         if "postDataString" not in request.keys():
             raise CommonException("-1","postDataString not exist")
         postDataString = request["postDataString"]
-        req = urllib2.Request(url, postDataString)
-        response = urllib2.urlopen(req)
-        content = response.read()
+        session = requests.Session()
+        response = session.post(url, postDataString)
+        content = response.text
         print "http post res:"+content
         return content
     raise CommonException("-1","method not valid")
