@@ -42,6 +42,7 @@ def parse_and_fetch(request):
     if request["method"] == "GET":
         response=urllib.urlopen(url)
         content=response.read()
+        print "http get res:"+content
         return content
     if request["method"] == "POST":
         if "postDataString" not in request.keys():
@@ -50,6 +51,7 @@ def parse_and_fetch(request):
         req = urllib2.Request(url, postDataString)
         response = urllib2.urlopen(req)
         content = response.read()
+        print "http post res:"+content
         return content
     raise CommonException("-1","method not valid")
 
