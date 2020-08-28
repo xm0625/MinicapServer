@@ -12,7 +12,7 @@ RUN apt-get update && \
     && ln -s /usr/bin/python2.7 /bin/python \
     && mkdir -p /baseDir
 
-COPY ./server_deploy/* /baseDir
+COPY . /baseDir
 
 WORKDIR /baseDir
 CMD ["/bin/python", "-u","./xserver.py"]
