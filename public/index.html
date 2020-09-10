@@ -1,8 +1,14 @@
-<!doctype html>
+<html>
 <head>
     <title>Phone</title>
 
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+
     <style>
+        body{
+            margin: 0;
+        }
+
         .leftToolBox {
             width: 12%;
             position: relative;
@@ -17,17 +23,18 @@
 
         .rightCanvasBox canvas {
             width: 100%;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
-<div class="leftToolBox">
-
-</div>
+<div class="leftToolBox">&nbsp;</div>
 <div class="rightCanvasBox">
     <canvas id="canvas" style="border: 1px solid red;"></canvas>
 </div>
 <div style="clear: both;"></div>
+
+<script type="text/javascript" charset="utf-8" src="./jquery.min.js"></script>
 <script>
     /*jshint browser:true*/
 
@@ -37,18 +44,18 @@
     var canvas = document.getElementById('canvas');
     var g = canvas.getContext('2d');
 
-    var ws = new WebSocket('ws://' + window.location.host, 'minicap');
-    ws.binaryType = 'blob';
+    var minicapWs = new WebSocket('ws://192.168.9.6:9002/minicap');
+    minicapWs.binaryType = 'blob';
 
-    ws.onclose = function () {
+    minicapWs.onclose = function () {
         console.log('onclose', arguments);
     };
 
-    ws.onerror = function () {
+    minicapWs.onerror = function () {
         console.log('onerror', arguments);
     };
 
-    ws.onmessage = function (message) {
+    minicapWs.onmessage = function (message) {
         var blob = new Blob([message.data], {type: 'image/jpeg'});
         var URL = window.URL || window.webkitURL;
         var img = new Image();
@@ -75,9 +82,9 @@
         img.src = u;
     };
 
-    ws.onopen = function () {
+    minicapWs.onopen = function () {
         console.log('onopen', arguments);
-        ws.send('1920x1080/0');
+        minicapWs.send('1920x1080/0');
     };
 
     function client() {
@@ -100,13 +107,22 @@
     }
 
     window.onload = function () {
+        $("#canvas").css("height", client().height+"px");
         canvas.height = client().height;
+
+        document.documentElement.style.overflow='hidden';
+        document.body.style.overflow='hidden';
     };
 
     window.onresize = function () {
+        console.log("onResize");
         setTimeout(window.location.reload, 1000);
     };
+
+
+    var minitouchWs = new WebSocket('ws://192.168.9.6:9002/minitouch');
 
 </script>
 
 </body>
+</html>
