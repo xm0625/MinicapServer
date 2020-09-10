@@ -6,6 +6,8 @@ var WebSocketServer = require('ws').Server
     , url = require('url')
     , app = express();
 
+var exec = require('child_process').exec;
+
 var PORT = process.env.PORT || 9002;
 
 app.use(express.static(path.join(__dirname, '/public')));
@@ -163,6 +165,8 @@ webSocketServerForMinicap.on('connection', function(ws) {
 
     minicapStream.on('readable', tryRead);
 
+    exec("adb shell input keyevent 3");
+
     ws.on('close', function() {
         console.info('Lost a client');
         minicapStream.end();
@@ -183,7 +187,7 @@ webSocketServerForMinitouch.on('connection', function connection(ws) {
         process.exit(1);
     });
 
-    minitouchStream.on('message', function(data) {
+    minitouchStream.on('readable', function(data) {
         console.info('minitouchStream out data:'+data);
         ws.send(data);
     });
