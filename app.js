@@ -3,6 +3,7 @@ var WebSocketServer = require('ws').Server
   , express = require('express')
   , path = require('path')
   , net = require('net')
+    , url = require('url')
   , app = express();
 
 var PORT = process.env.PORT || 9002;
