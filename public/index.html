@@ -106,18 +106,19 @@
         }
     }
 
-    window.onload = function () {
-        $("#canvas").css("height", client().height+"px");
-        canvas.height = client().height;
-
-        document.documentElement.style.overflow='hidden';
-        document.body.style.overflow='hidden';
-    };
-
     window.onresize = function () {
         console.log("onResize");
         setTimeout(window.location.reload, 1000);
     };
+
+    $(document).ready(function(){
+        $("#canvas").css("height", client().height+"px");
+        canvas.height = client().height;
+        canvas.width = parseInt($("#canvas").css("width"));
+
+        document.documentElement.style.overflow='hidden';
+        document.body.style.overflow='hidden';
+    });
 
 
     var minitouchWs = new WebSocket('ws://192.168.9.6:9002/minitouch');
