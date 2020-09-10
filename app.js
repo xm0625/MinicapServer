@@ -185,7 +185,7 @@ webSocketServerForMinitouch.on('connection', function connection(ws) {
 
     minitouchStream.on('message', function(data) {
         console.info('minitouchStream out data:'+data);
-        ws.write(data);
+        ws.send(data);
     });
 
     ws.on('message', function(data) {
