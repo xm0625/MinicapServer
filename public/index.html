@@ -38,6 +38,14 @@
 <script>
     /*jshint browser:true*/
 
+    var canvasOffsetX=0;
+
+    var touchWidth=1620;
+    var touchHeight=2880;
+    var touchRatio=0;
+
+    var realShowWidth=0;
+
     var BLANK_IMG =
         'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
@@ -60,17 +68,23 @@
         var URL = window.URL || window.webkitURL;
         var img = new Image();
         img.onload = function () {
-            console.log(img.width, img.height);
             var widthRatio = canvas.width / img.width;
             var heightRatio = canvas.height / img.height;
             var ratio;
             if(widthRatio < heightRatio){
                 ratio = widthRatio;
-                g.drawImage(img, 0, 0, img.width*ratio, img.height*ratio);
+                realShowWidth = img.width*ratio;
+                if(touchRatio === 0){
+                    touchRatio = touchWidth/realShowWidth;
+                }
+                g.drawImage(img, 0, 0, realShowWidth, img.height*ratio);
             }else{
                 ratio = heightRatio;
-                var realWidth = img.width*ratio;
-                g.drawImage(img, canvas.width - realWidth, 0, realWidth, img.height*ratio);
+                realShowWidth = img.width*ratio;
+                if(touchRatio === 0){
+                    touchRatio = touchWidth/realShowWidth;
+                }
+                g.drawImage(img, 0, 0, realShowWidth, img.height*ratio);
             }
             img.onload = null;
             img.src = BLANK_IMG;
@@ -116,12 +130,62 @@
         canvas.height = client().height;
         canvas.width = parseInt($("#canvas").css("width"));
 
+        canvasOffsetX= client().width-canvas.width;
+
         document.documentElement.style.overflow='hidden';
         document.body.style.overflow='hidden';
     });
 
 
     var minitouchWs = new WebSocket('ws://192.168.9.6:9002/minitouch');
+
+    $("#canvas").on("touchstart", function(e) {
+        e.preventDefault();
+        var x = e.originalEvent.changedTouches[0].pageX-canvasOffsetX;
+        var y = e.originalEvent.changedTouches[0].pageY;
+        console.log(e);
+        console.log("touchstart:    "+x+"  "+y+"");
+        if(touchRatio===0){
+            return;
+        }
+        var touchX = x*touchRatio;
+        if(touchX>touchWidth){
+            return;
+        }
+        var touchY = y*touchRatio;
+        if(touchY>touchHeight){
+            return;
+        }
+        minitouchWs.send("d 0 " + parseInt(touchX) + " " + parseInt(touchY) + " 50\nc\n");
+    });
+
+    $("#canvas").on("touchend", function(e) {
+        e.preventDefault();
+        minitouchWs.send("u 0\nc\n");
+    });
+
+    $("#canvas").on("touchmove", function(e) {
+        e.preventDefault();
+        var x = e.originalEvent.changedTouches[0].pageX-canvasOffsetX;
+        var y = e.originalEvent.changedTouches[0].pageY;
+        console.log("touchmove:    "+x+"  "+y+"");
+        if(touchRatio===0){
+            return;
+        }
+        if(touchRatio===0){
+            return;
+        }
+        var touchX = x*touchRatio;
+        if(touchX>touchWidth){
+            return;
+        }
+        var touchY = y*touchRatio;
+        if(touchY>touchHeight){
+            return;
+        }
+        minitouchWs.send("m 0 " + parseInt(touchX) + " " + parseInt(touchY) + " 50\nc\n");
+
+    });
 
 </script>
 
