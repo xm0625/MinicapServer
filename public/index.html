@@ -52,7 +52,7 @@
     var canvas = document.getElementById('canvas');
     var g = canvas.getContext('2d');
 
-    var minicapWs = new WebSocket('ws://192.168.9.6:9002/minicap');
+    var minicapWs = new WebSocket('ws://' + window.location.host + '/minicap');
     minicapWs.binaryType = 'blob';
 
     minicapWs.onclose = function () {
@@ -137,7 +137,7 @@
     });
 
 
-    var minitouchWs = new WebSocket('ws://192.168.9.6:9002/minitouch');
+    var minitouchWs = new WebSocket('ws://' + window.location.host + '/minitouch');
 
     $("#canvas").on("touchstart", function(e) {
         e.preventDefault();
