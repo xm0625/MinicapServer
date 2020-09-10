@@ -183,8 +183,13 @@ webSocketServerForMinitouch.on('connection', function connection(ws) {
         process.exit(1);
     });
 
+    minitouchStream.on('message', function(data) {
+        console.info('minitouchStream out data:'+data);
+        ws.write(data);
+    });
+
     ws.on('message', function(data) {
-        console.info('receive data:'+data);
+        console.info('webSocketServerForMinitouch receive data:'+data);
         minitouchStream.write(data);
     });
 
