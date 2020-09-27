@@ -1,6 +1,8 @@
 #!/bin/sh
 cpu_arch=`adb shell getprop ro.product.cpu.abi`
+cpu_arch=`echo $cpu_arch|tr -d "\r"`
 api_ver_num=`adb shell getprop ro.build.version.sdk`
+api_ver_num=`echo $api_ver_num|tr -d "\r"`
 adb push ./node_modules/minicap-prebuilt/prebuilt/$cpu_arch/bin/minicap /data/local/tmp/
 adb push ./node_modules/minicap-prebuilt/prebuilt/$cpu_arch/lib/android-$api_ver_num/minicap.so  /data/local/tmp/
 adb push ./node_modules/minitouch-prebuilt/prebuilt/$cpu_arch/bin/minitouch /data/local/tmp/
