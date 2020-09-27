@@ -21,3 +21,4 @@ ps -ef | grep node | grep app >/dev/null 2>&1
 [ $? -eq 1 ] && nohup  node app.js  >/dev/null 2>&1 &
 
 # adb shell svc power stayon true && adb shell input keyevent 26
+
