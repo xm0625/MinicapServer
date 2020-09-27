@@ -12,6 +12,24 @@ var PORT = process.env.PORT || 9002;
 
 app.use(express.static(path.join(__dirname, '/public')));
 
+app.use('/info',function(req,res){
+    exec("adb shell /data/local/tmp/minitouch 2>&1 | grep contacts | awk -F ' [(]' '{print $2}' | awk -F ' ' '{print $1}'", {
+        timeout: 3000
+    }, function(err, stdout, stderr){
+        if(err) {
+            res.send(JSON.stringify({
+                "code": "-1",
+                "msg": stderr
+            }));
+        } else {
+            res.send(JSON.stringify({
+                "code": "0",
+                "data": stdout
+            }));
+        }
+    });
+});
+
 var server = http.createServer(app);
 
 const webSocketServerForMinicap = new WebSocketServer({ noServer: true });

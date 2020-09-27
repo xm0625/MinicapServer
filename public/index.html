@@ -52,140 +52,175 @@
     var canvas = document.getElementById('canvas');
     var g = canvas.getContext('2d');
 
-    var minicapWs = new WebSocket('ws://' + window.location.host + '/minicap');
-    minicapWs.binaryType = 'blob';
+    var minicapWs = null;
+    var minitouchWs = null;
 
-    minicapWs.onclose = function () {
-        console.log('onclose', arguments);
-    };
 
-    minicapWs.onerror = function () {
-        console.log('onerror', arguments);
-    };
+    function initCanvas(){
+        minicapWs = new WebSocket('ws://' + window.location.host + '/minicap');
+        minitouchWs = new WebSocket('ws://' + window.location.host + '/minitouch');
 
-    minicapWs.onmessage = function (message) {
-        var blob = new Blob([message.data], {type: 'image/jpeg'});
-        var URL = window.URL || window.webkitURL;
-        var img = new Image();
-        img.onload = function () {
-            var widthRatio = canvas.width / img.width;
-            var heightRatio = canvas.height / img.height;
-            var ratio;
-            if(widthRatio < heightRatio){
-                ratio = widthRatio;
-                realShowWidth = img.width*ratio;
-                if(touchRatio === 0){
-                    touchRatio = touchWidth/realShowWidth;
-                }
-                g.drawImage(img, 0, 0, realShowWidth, img.height*ratio);
-            }else{
-                ratio = heightRatio;
-                realShowWidth = img.width*ratio;
-                if(touchRatio === 0){
-                    touchRatio = touchWidth/realShowWidth;
-                }
-                g.drawImage(img, 0, 0, realShowWidth, img.height*ratio);
-            }
-            img.onload = null;
-            img.src = BLANK_IMG;
-            img = null;
-            u = null;
-            blob = null;
+        minicapWs.binaryType = 'blob';
+
+        minicapWs.onclose = function () {
+            console.log('onclose', arguments);
         };
-        var u = URL.createObjectURL(blob);
-        img.src = u;
-    };
 
-    minicapWs.onopen = function () {
-        console.log('onopen', arguments);
-        minicapWs.send('1920x1080/0');
-    };
+        minicapWs.onerror = function () {
+            console.log('onerror', arguments);
+        };
 
-    function client() {
-        if (window.innerHeight !== undefined) {
-            return {
-                "width": window.innerWidth,
-                "height": window.innerHeight
-            }
-        } else if (document.compatMode === "CSS1Compat") {
-            return {
-                "width": document.documentElement.clientWidth,
-                "height": document.documentElement.clientHeight
-            }
-        } else {
-            return {
-                "width": document.body.clientWidth,
-                "height": document.body.clientHeight
+        minicapWs.onmessage = function (message) {
+            var blob = new Blob([message.data], {type: 'image/jpeg'});
+            var URL = window.URL || window.webkitURL;
+            var img = new Image();
+            img.onload = function () {
+                var widthRatio = canvas.width / img.width;
+                var heightRatio = canvas.height / img.height;
+                var ratio;
+                if(widthRatio < heightRatio){
+                    ratio = widthRatio;
+                    realShowWidth = img.width*ratio;
+                    if(touchRatio === 0){
+                        touchRatio = touchWidth/realShowWidth;
+                    }
+                    g.drawImage(img, 0, 0, realShowWidth, img.height*ratio);
+                }else{
+                    ratio = heightRatio;
+                    realShowWidth = img.width*ratio;
+                    if(touchRatio === 0){
+                        touchRatio = touchWidth/realShowWidth;
+                    }
+                    g.drawImage(img, 0, 0, realShowWidth, img.height*ratio);
+                }
+                img.onload = null;
+                img.src = BLANK_IMG;
+                img = null;
+                u = null;
+                blob = null;
+            };
+            var u = URL.createObjectURL(blob);
+            img.src = u;
+        };
+
+        minicapWs.onopen = function () {
+            console.log('onopen', arguments);
+            minicapWs.send('1920x1080/0');
+        };
+
+        function client() {
+            if (window.innerHeight !== undefined) {
+                return {
+                    "width": window.innerWidth,
+                    "height": window.innerHeight
+                }
+            } else if (document.compatMode === "CSS1Compat") {
+                return {
+                    "width": document.documentElement.clientWidth,
+                    "height": document.documentElement.clientHeight
+                }
+            } else {
+                return {
+                    "width": document.body.clientWidth,
+                    "height": document.body.clientHeight
+                }
             }
         }
+
+        window.onresize = function () {
+            console.log("onResize");
+            setTimeout(window.location.reload, 1000);
+        };
+
+        $(document).ready(function(){
+            $("#canvas").css("height", client().height+"px");
+            canvas.height = client().height;
+            canvas.width = parseInt($("#canvas").css("width"));
+
+            canvasOffsetX= client().width-canvas.width;
+
+            document.documentElement.style.overflow='hidden';
+            document.body.style.overflow='hidden';
+        });
+
+
+
+        $("#canvas").on("touchstart", function(e) {
+            e.preventDefault();
+            var x = e.originalEvent.changedTouches[0].pageX-canvasOffsetX;
+            var y = e.originalEvent.changedTouches[0].pageY;
+            console.log(e);
+            console.log("touchstart:    "+x+"  "+y+"");
+            if(touchRatio===0){
+                return;
+            }
+            var touchX = x*touchRatio;
+            if(touchX>touchWidth){
+                return;
+            }
+            var touchY = y*touchRatio;
+            if(touchY>touchHeight){
+                return;
+            }
+            minitouchWs.send("d 0 " + parseInt(touchX) + " " + parseInt(touchY) + " 50\nc\n");
+        });
+
+        $("#canvas").on("touchend", function(e) {
+            e.preventDefault();
+            minitouchWs.send("u 0\nc\n");
+        });
+
+        $("#canvas").on("touchmove", function(e) {
+            e.preventDefault();
+            var x = e.originalEvent.changedTouches[0].pageX-canvasOffsetX;
+            var y = e.originalEvent.changedTouches[0].pageY;
+            console.log("touchmove:    "+x+"  "+y+"");
+            if(touchRatio===0){
+                return;
+            }
+            if(touchRatio===0){
+                return;
+            }
+            var touchX = x*touchRatio;
+            if(touchX>touchWidth){
+                return;
+            }
+            var touchY = y*touchRatio;
+            if(touchY>touchHeight){
+                return;
+            }
+            minitouchWs.send("m 0 " + parseInt(touchX) + " " + parseInt(touchY) + " 50\nc\n");
+
+        });
     }
 
-    window.onresize = function () {
-        console.log("onResize");
-        setTimeout(window.location.reload, 1000);
-    };
-
     $(document).ready(function(){
-        $("#canvas").css("height", client().height+"px");
-        canvas.height = client().height;
-        canvas.width = parseInt($("#canvas").css("width"));
-
-        canvasOffsetX= client().width-canvas.width;
-
-        document.documentElement.style.overflow='hidden';
-        document.body.style.overflow='hidden';
-    });
-
-
-    var minitouchWs = new WebSocket('ws://' + window.location.host + '/minitouch');
-
-    $("#canvas").on("touchstart", function(e) {
-        e.preventDefault();
-        var x = e.originalEvent.changedTouches[0].pageX-canvasOffsetX;
-        var y = e.originalEvent.changedTouches[0].pageY;
-        console.log(e);
-        console.log("touchstart:    "+x+"  "+y+"");
-        if(touchRatio===0){
-            return;
-        }
-        var touchX = x*touchRatio;
-        if(touchX>touchWidth){
-            return;
-        }
-        var touchY = y*touchRatio;
-        if(touchY>touchHeight){
-            return;
-        }
-        minitouchWs.send("d 0 " + parseInt(touchX) + " " + parseInt(touchY) + " 50\nc\n");
-    });
-
-    $("#canvas").on("touchend", function(e) {
-        e.preventDefault();
-        minitouchWs.send("u 0\nc\n");
-    });
-
-    $("#canvas").on("touchmove", function(e) {
-        e.preventDefault();
-        var x = e.originalEvent.changedTouches[0].pageX-canvasOffsetX;
-        var y = e.originalEvent.changedTouches[0].pageY;
-        console.log("touchmove:    "+x+"  "+y+"");
-        if(touchRatio===0){
-            return;
-        }
-        if(touchRatio===0){
-            return;
-        }
-        var touchX = x*touchRatio;
-        if(touchX>touchWidth){
-            return;
-        }
-        var touchY = y*touchRatio;
-        if(touchY>touchHeight){
-            return;
-        }
-        minitouchWs.send("m 0 " + parseInt(touchX) + " " + parseInt(touchY) + " 50\nc\n");
-
-    });
+        $.get("/info").then(function(data){
+            if(typeof(data) === "string"){
+                data = JSON.parse(data);
+            }
+            if(data["code"]!=="0"){
+                alert("设备信息获取失败, 请重试!!");
+                return;
+            }
+            data = data["data"];
+            if(typeof(data) !== "string" || data.trim().length === 0){
+                alert("信息解析失败");
+                return;
+            }
+            data = data.trim();
+            var splitArray = data.split("x");
+            if(splitArray.length !== 2){
+                alert("信息解析失败!!");
+                return;
+            }
+            touchWidth = splitArray[0];
+            touchHeight = splitArray[1];
+            initCanvas();
+        }).fail(function(e){
+            alert("设备信息获取失败, 请重试");
+        })
+    })
 
 </script>
 
