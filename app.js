@@ -30,6 +30,32 @@ app.use('/info',function(req,res){
     });
 });
 
+app.use('/keyevent',function(req,res){
+    var k = req.query["k"];
+    if(typeof(k) !== "string"){
+        res.send(JSON.stringify({
+            "code": "-1",
+            "msg": "param not ok"
+        }));
+        return;
+    }
+    exec("adb shell input keyevent "+k, {
+        timeout: 3000
+    }, function(err, stdout, stderr){
+        if(err) {
+            res.send(JSON.stringify({
+                "code": "-1",
+                "msg": stderr
+            }));
+        } else {
+            res.send(JSON.stringify({
+                "code": "0",
+                "data": stdout
+            }));
+        }
+    });
+});
+
 var server = http.createServer(app);
 
 const webSocketServerForMinicap = new WebSocketServer({ noServer: true });

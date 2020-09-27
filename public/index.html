@@ -25,10 +25,18 @@
             width: 100%;
             box-sizing: border-box;
         }
+
+        .leftToolBox > div{
+            box-sizing: border-box;
+            border: 1px solid red;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-<div class="leftToolBox">&nbsp;</div>
+<div class="leftToolBox">
+    <div class="powerButton">电源</div>
+</div>
 <div class="rightCanvasBox">
     <canvas id="canvas" style="border: 1px solid red;"></canvas>
 </div>
@@ -108,40 +116,11 @@
             minicapWs.send('1920x1080/0');
         };
 
-        function client() {
-            if (window.innerHeight !== undefined) {
-                return {
-                    "width": window.innerWidth,
-                    "height": window.innerHeight
-                }
-            } else if (document.compatMode === "CSS1Compat") {
-                return {
-                    "width": document.documentElement.clientWidth,
-                    "height": document.documentElement.clientHeight
-                }
-            } else {
-                return {
-                    "width": document.body.clientWidth,
-                    "height": document.body.clientHeight
-                }
-            }
-        }
 
         window.onresize = function () {
             console.log("onResize");
             setTimeout(window.location.reload, 1000);
         };
-
-        $(document).ready(function(){
-            $("#canvas").css("height", client().height+"px");
-            canvas.height = client().height;
-            canvas.width = parseInt($("#canvas").css("width"));
-
-            canvasOffsetX= client().width-canvas.width;
-
-            document.documentElement.style.overflow='hidden';
-            document.body.style.overflow='hidden';
-        });
 
 
 
@@ -194,7 +173,54 @@
         });
     }
 
+
+    function client() {
+        if (window.innerHeight !== undefined) {
+            return {
+                "width": window.innerWidth,
+                "height": window.innerHeight
+            }
+        } else if (document.compatMode === "CSS1Compat") {
+            return {
+                "width": document.documentElement.clientWidth,
+                "height": document.documentElement.clientHeight
+            }
+        } else {
+            return {
+                "width": document.body.clientWidth,
+                "height": document.body.clientHeight
+            }
+        }
+    }
+
     $(document).ready(function(){
+        $("#canvas").css("height", client().height+"px");
+        canvas.height = client().height;
+        canvas.width = parseInt($("#canvas").css("width"));
+
+        canvasOffsetX= client().width-canvas.width;
+
+        document.documentElement.style.overflow='hidden';
+        document.body.style.overflow='hidden';
+
+
+        $(".powerButton").css("height", canvasOffsetX+"px");
+        $(".powerButton").css("line-height", canvasOffsetX+"px");
+        $(".powerButton").on("click", function(){
+            $.get("/keyevent?k=26").then(function(data){
+                if(typeof(data) === "string"){
+                    data = JSON.parse(data);
+                }
+                if(data["code"]!=="0"){
+                    alert("发送失败");
+                    return;
+                }
+            }).fail(function(e){
+                alert("发送失败, 请重试");
+            })
+        });
+
+
         $.get("/info").then(function(data){
             if(typeof(data) === "string"){
                 data = JSON.parse(data);
