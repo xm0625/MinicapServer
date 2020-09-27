@@ -10,7 +10,7 @@ adb push ./node_modules/minitouch-prebuilt/prebuilt/$cpu_arch/bin/minitouch /dat
 width_px=`adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i | grep width | awk -F ': ' '{print $2}' | awk -F ',' '{print $1}'`
 height_px=`adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i | grep height | awk -F ': ' '{print $2}' | awk -F ',' '{print $1}'`
 r_width=`expr $width_px / 2`
-r_height=`expr height_px / 2`
+r_height=`expr $height_px / 2`
 adb shell ps | grep minicap >/dev/null 2>&1
 [ $? -eq 1 ] && nohup adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P $width_pxx$height_px@$r_widthx$r_height/0 -Q 30 -S >/dev/null 2>&1 &
 
