@@ -13,3 +13,5 @@ WORKDIR /baseDir
 RUN npm install && \
 	npm cache clean -f
 
+
+ENTRYPOINT ["/sbin/tini", "--", "init.sh"]
