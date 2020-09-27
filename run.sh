@@ -12,7 +12,7 @@ height_px=`adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -i 
 r_width=`expr $width_px / 2`
 r_height=`expr $height_px / 2`
 adb shell ps | grep minicap >/dev/null 2>&1
-[ $? -eq 1 ] && nohup adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P $width_pxx$height_px@$r_widthx$r_height/0 -Q 30 -S >/dev/null 2>&1 &
+[ $? -eq 1 ] && nohup adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P "${width_px}x${height_px}@${r_width}x${r_height}/0" -Q 30 -S >/dev/null 2>&1 &
 
 adb shell ps | grep minitouch >/dev/null 2>&1
 [ $? -eq 1 ] && nohup adb shell /data/local/tmp/minitouch >/dev/null 2>&1 &
