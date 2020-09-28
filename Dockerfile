@@ -14,4 +14,4 @@ RUN npm install && \
 	npm cache clean -f
 
 
-ENTRYPOINT ["/sbin/tini", "--", "init.sh"]
+CMD ["/bin/sh", "init.sh"]
